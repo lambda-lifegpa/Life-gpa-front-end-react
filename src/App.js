@@ -1,20 +1,24 @@
-import React from "react";
-import { Route } from "react-router-dom";
+import React, { Component } from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Link,
+  withRouter
+} from "react-router-dom";
 import Login from "./components/Login";
-import SignupForm from "./components/Signupform";
-import "./App.css";
-import Dashboard from "./components/Dashboard";
-import PrivateRoute from "./components/PrivateRoute";
+import SignUp from "./components/Signupform";
+import HomePage from "./components/homepage";
 
-function App() {
-  return (
-    <div className="App">
-      <Route exact path="/" component={Login} />
-      <Route path="/login" component={Login} />
-      <Route path="/signup" component={SignupForm} />
-      <PrivateRoute exact path="/protected" component={Dashboard} />
-    </div>
-  );
+class App extends Component {
+  render() {
+    return (
+      <div className="App">
+        <Route path="/signUp" render={props => <SignUp {...props} />} />
+        <Route path="/login" render={props => <Login {...props} />} />
+        <Route path="/home" render={props => <HomePage {...props} />} />
+      </div>
+    );
+  }
 }
 
 export default App;

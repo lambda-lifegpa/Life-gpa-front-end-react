@@ -1,15 +1,16 @@
 import React from "react";
-import styled from "styled-components";
-import { Link } from "react-router-dom";
-import { connect } from "react-redux";
-import { login } from "../actions";
-import Loader from "react-loader-spinner";
 import axios from "axios";
+import { Link } from "react-router-dom";
+import styled from "styled-components";
+import { connect } from "react-redux";
+import Loader from "react-loader-spinner";
+import { login } from "../actions";
+import Nav from "./Nav";
 
 const StyledInput = styled.input`
   margin: 2%;
-  padding: 2%;
-  font-size: 20px;
+  padding: 20px 0;
+  font-size: 40px;
   border-radius: 10px;
 `;
 
@@ -19,108 +20,101 @@ const LoginForm = styled.form`
 `;
 
 const LoginH1 = styled.h1`
+  color: lightcyan;
   text-align: center;
 `;
 
 const LoginWrapperDiv = styled.div`
-  padding: 5%;
   width: 80%;
   height: 100%;
-  margin: 0 10%;
+  margin: 2% auto;
+  background-image: url("https://www.rd.com/wp-content/uploads/2018/02/00_Can-You-Guess-the-Famous-City-Based-on-Their-Skylines_441608320_Funny-Solution-Studio_FT.jpg");
+  background-size: cover;
 `;
 
-const LoginH3 = styled.h3`
-  padding-top: 15px;
-`;
-
-const StyledBtn = styled.button`
+const StyledButton = styled.button`
   display: flex;
   justify-content: center;
   margin: 2% auto;
   padding: 20px;
   width: 50%;
   font-size: 20px;
+  border-radius: 10px;
+  background: darkgrey;
 `;
-class Login extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      credentials: {
-        username: "",
-        password: ""
-      }
-    };
-  }
+const LoginH3 = styled.h3`
+  padding-top: 10px;
+  color: #fff;
 
-  handleInput = event => {
+  text-align: center;
+`;
+
+class Login extends React.Component {
+  state = {
+    username: "",
+    password: ""
+  };
+
+  handleChange = e => {
     this.setState({
-      credentials: {
-        ...this.state.credentials,
-        [event.target.name]: event.target.value
-      }
+      [e.target.name]: e.target.value
     });
   };
 
-  //   handleSubmit = event => {
-  //     event.preventDefault();
-  //     const credentials = this.state;
-  //     axios
-  //       .post("https://lifegpadb.herokuapp.com/api/users/login", credentials)
-  //       .then(res => {
-  //         const username = res.data.username;
-  //         const token = res.data.token;
-  //         localStorage.setItem("token", token);
-  //         localStorage.setItem("username", username);
-  //         this.props.history.push("/protected");
-  //       })
-  //       .catch(err => console.log(err.response));
-  //   };
-  login = event => {
-    event.preventDefault();
-    this.props
-      .login(this.state.credentials)
-      .then(() => this.props.history.push("/protected"))
-      .catch(err => console.log(err));
+  handleSubmit = e => {
+    e.preventDefault();
+    const credentials = this.state;
+    axios
+      .post("http://lifegpadb.herokuapp.com/api/users/login", credentials)
+      .then(res => {
+        console.log(res.data, "5");
+        const token = res.data.token;
+        const id = res.data.id;
+        localStorage.setItem("token", token);
+        localStorage.setItem("id", id);
+        this.props.history.push("/home");
+      })
+      .catch(err => console.log(err.response));
   };
 
   render() {
-    if (this.props.signingIn)
-      return <Loader type="Audio" color="#C62727" height={100} width={100} />;
-    else
-      return (
+    return (
+      <>
+        <Nav />
         <LoginWrapperDiv>
-          <LoginH1>Welcome Back!</LoginH1>
-
-          <LoginForm onSubmit={this.login}>
+          <LoginH1>Welcome Back to LifeGPA!</LoginH1>
+          <LoginForm onSubmit={this.handleSubmit}>
             <StyledInput
-              type="text"
+              type="username"
               name="username"
-              value={this.state.credentials.username}
+              value={this.state.username}
               placeholder="Username"
-              onChange={this.handleInput}
+              onChange={this.handleChange}
             />
             <StyledInput
               type="password"
               name="password"
-              value={this.state.credentials.password}
+              value={this.state.password}
               placeholder="password"
-              onChange={this.handleInput}
+              onChange={this.handleChange}
             />
-            <StyledBtn className="login" type="submit">
+
+            <StyledButton
+              onClick={this.handleSubmit}
+              className="submit-login"
+              type="submit"
+            >
               Log in
-            </StyledBtn>
+            </StyledButton>
           </LoginForm>
-          <LoginH3>
-            <Link to="/signup">Not signed up yet?</Link>
-          </LoginH3>
+          <LoginH3>Not signed up yet?</LoginH3>
+          <StyledButton className="sign-up-link">
+            <Link to="/signup">Sign up now</Link>
+          </StyledButton>
         </LoginWrapperDiv>
-      );
+      </>
+    );
   }
 }
 
-const mapStateToProps = ({ error, loggingIn }) => ({ error, loggingIn });
-
-export default connect(
-  mapStateToProps,
-  { login }
-)(Login);
+export default Login;

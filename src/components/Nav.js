@@ -1,20 +1,20 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { BrowserRouter as Route, Link } from "react-router-dom";
 
-const Nav = () => {
+const NavBar = () => {
   return (
-    <div>
-      <nav>
-        <div>
-          <button className="sign-out">
-            <NavLink exact to="/login">
-              sign out
-            </NavLink>
-          </button>
-        </div>
-      </nav>
+    <div className="navBar1">
+      <h2 className="mainTital1">LifeGPA</h2>
+      <div className="navBarLinks">
+        <Link to="/login" className="Link">
+          Login
+        </Link>
+        <Link to="/signUp" className="Link">
+          Sign Up
+        </Link>
+      </div>
     </div>
   );
 };
 
-export default Nav;
+export default NavBar;

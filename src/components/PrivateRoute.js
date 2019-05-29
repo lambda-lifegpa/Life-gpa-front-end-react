@@ -8,6 +8,7 @@ const PrivateRoute = ({
   token,
   ...rest
 }) => {
+  console.log(token);
   return (
     <div>
       <Route

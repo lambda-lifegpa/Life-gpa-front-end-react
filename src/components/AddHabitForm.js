@@ -1,71 +1,54 @@
 import React from "react";
-import { connect } from "react-redux";
-import { addHabit, getData } from "../actions";
+import axios from "axios";
+import authentication from "../authentication/authentication";
 
-class AddHabitForm extends React.Component {
-  constructor() {
-    super();
+class AddHabit extends React.Component {
+  constructor(props) {
+    super(props);
     this.state = {
-      habits: {
-        name: "",
-        category: "",
-        completed: false
-      }
+      habit: ""
     };
   }
-  componentDidMount() {
-    this.setState({ name: "", category: "" });
-  }
 
-  handleInput = event => {
-    event.preventDefault();
+  handleSubmit = e => {
+    e.preventDefault();
+    const newHabit = this.state;
+    const user_id = localStorage.getItem("id");
+    const sentItems = { ...newHabit, user_id };
+    authentication()
+      .post("http://lifegpadb.herokuapp.com/api/habits", sentItems)
+      .then(res => {
+        console.log(res);
+        this.props.getHabits();
+        this.setState({ habit: "" });
+      })
+      .catch(err => console.log(err.response));
+  };
+
+  handleChange = e => {
     this.setState({
-      ...this.state.task,
-      [event.target.name]: event.target.value
+      [e.target.name]: e.target.value
     });
   };
 
-  addHabit = event => {
-    this.props.addHabit(this.state.habits);
-    this.props.getData();
-  };
-
   render() {
+    console.log();
     return (
-      <div>
-        <form>
-          <h1>Add a Task for Today</h1>
-          <p>
-            You can add a task and its category, it will be added to your Task
-            List. Each day mark whether you completedeach task, and it will be
-            added to your average
-          </p>
+      <div className="addHabitForm">
+        <form className="addHabit" onSubmit={this.handleSubmit}>
           <input
-            tpye="text"
-            name="name"
-            placeholder="task"
-            value={this.state.task.name}
-            onChange={this.handleInput}
-          />
-          <input
+            className="addHabitInput"
             type="text"
-            name="category"
-            placeholder="category"
-            value={this.state.task.category}
-            onChange={this.handleInput}
+            name="habit"
+            placeholder="Add New Habit..."
+            onChange={this.handleChange}
+            value={this.state.habit}
           />
-          <button className="add-task" type="submit">
-            add Task
-          </button>
+
+          <button className="addingNewHabitButton">Add New Habit</button>
         </form>
       </div>
     );
   }
 }
-
-const mapStateToProps = ({ error, addingHabit }) => ({ error, addingHabit });
-
-export default connect(
-  mapStateToProps,
-  { addHabit, getData }
-)(AddHabitForm);
+export default AddHabit;

@@ -1,33 +1,40 @@
 import React from "react";
 import Habit from "./Habit";
-import AddTaskFrom from "./AddHabitForm";
+import AddHabit from "./AddHabitForm";
 
 const HabitList = props => {
-  console.log("habitlist prop", props.habits);
+  console.log("habitlist props", props.habits);
 
   return (
     <div className="habit-list">
-      <h1>Habit List</h1>
+      <h1>habit List</h1>
       <p>
-        This is your daily task list, to be graded. Each day, input a task that
-        you accomplished, at end of each day you either Pass or Fail. Don't
-        worry we won't say anything if you "read" but simply glance at a few
-        pages.
+        This is a list of your daily habits to be graded. Each day, tell us if
+        you did a habit.
       </p>
-      <div className="task-container">
+      <div className="habits-container">
         {props.habits.map(habit => {
           return (
             <div>
-              <Habit
-                key={habit.id}
+              <habit
+                key={habit._id}
                 habit={habit}
                 toggleCompleted={props.toggleCompleted}
+                deletehabit={props.deletehabit}
+                updatehabit={props.updatehabit}
               />
             </div>
           );
         })}
       </div>
-      <button className="submit-task">Submit Habit!</button>
+      <button
+        className={`btn btn-primary`}
+        onClick={() => {
+          props.submithabits();
+        }}
+      >
+        Submit your habits for grading!
+      </button>
     </div>
   );
 };

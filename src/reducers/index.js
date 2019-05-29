@@ -85,11 +85,11 @@ const reducer = (state = initialState, action) => {
     case SUBMIT_HABITS:
       return {
         ...state,
-        habit: action.payload,
+        habits: action.payload,
         daily: action.payload.daily,
         weekly: action.payload.weekly,
         monthly: action.payload.monthly,
-        total: action.payload.total,
+        total: action.payload.allTime,
         submittingHabit: false
       };
     case ADDING_HABIT:

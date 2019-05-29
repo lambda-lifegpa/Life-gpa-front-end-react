@@ -1,14 +1,22 @@
 import React from "react";
-import styled from "styled-components";
-import { Link } from "react-router-dom";
-import { connect } from "react-redux";
-import { signUp } from "../actions";
 import axios from "axios";
+import { BrowserRouter as Route, Link } from "react-router-dom";
+import styled from "styled-components";
+import NavBar from "./Nav";
+
 const SignUph1 = styled.h1`
   text-align: center;
+  font-size: 50px;
+  color: #fff;
 `;
 
 const SignUpWrapper = styled.div`
+  background-image: url("https://www.rd.com/wp-content/uploads/2018/02/00_Can-You-Guess-the-Famous-City-Based-on-Their-Skylines_441608320_Funny-Solution-Studio_FT.jpg");
+  background-size: cover;
+  height: 969px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 1050px;
   width: 80%;
   height: 100%;
   margin: 2% auto;
@@ -20,7 +28,8 @@ const SignUpForm = styled.form`
 `;
 
 const SignUpInput = styled.input`
-  margin: 2%;
+  margin: 2% 23%;
+
   padding: 20px 0;
   font-size: 40px;
   border-radius: 10px;
@@ -30,93 +39,113 @@ const SignUph3 = styled.h3`
   padding-top: 10px;
 `;
 
-const StyleButton = styled.button`
+const StyledButton = styled.button`
   display: flex;
   justify-content: center;
   margin: 2% auto;
   padding: 20px;
   width: 50%;
   font-size: 20px;
+  border-radius: 10px;
+  background-color: ;
 `;
-class SignupForm extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      first_name: "",
-      last_name: "",
-      username: "",
-      password: ""
-    };
-  }
+const StyledNav = styled.nav`
+  display: flex;
+  flex-direction: row;
+  justify-content: fllex-start;
+`;
+const StyledP = styled.p`
+  color: #fff;
+  font-size: 20px;
+`;
 
-  handleInput = event => {
+class SignUp extends React.Component {
+  state = {
+    first_name: "",
+    last_name: "",
+    username: "",
+    password: ""
+  };
+
+  handleChange = e => {
     this.setState({
-      credentials: {
-        ...this.state.credentials,
-        [event.target.name]: event.target.value
-      }
+      [e.target.name]: e.target.value
     });
   };
 
-  // signup
-
-  signUp = event => {
-    event.preventDefault();
+  handleSubmit = e => {
+    e.preventDefault();
+    // console.log(this.props.history)
     const credentials = this.state;
-    return axios
-      .post("https://lifegpadb.herokuapp.com/api/users/register", credentials)
+    axios
+      .post("http://lifegpadb.herokuapp.com/api/users/register", credentials)
       .then(res => {
+        const token = res.data.token;
+        localStorage.setItem("token", token);
         this.props.history.push("/login");
       })
       .catch(err => console.log(err.response));
   };
+
   render() {
     return (
-      <SignUpWrapper>
-        <SignUph1>Sign Up for LifeGPA today!</SignUph1>
-        <SignUpForm onSubmit={this.signUp}>
-          <SignUpInput
-            type="text"
-            name="username"
-            placeholder="username"
-            onChange={this.handleInput}
-          />
-          <SignUpInput
-            type="text"
-            name="first-name"
-            placeholder="First Name"
-            onChange={this.handleInput}
-          />
-          <SignUpInput
-            type="text"
-            name="last-name"
-            placeholder="Last Name"
-            onChange={this.handleInput}
-          />
-          <SignUpInput
-            type="text"
-            name="password"
-            placeholder="password"
-            onChange={this.handleInput}
-          />
-          <StyleButton className="signup-btn" type="submit">
-            Discover Your GPA
-          </StyleButton>
-        </SignUpForm>
-        <SignUph3>Already Signed up?</SignUph3>
-        <StyleButton className="login">
-          <Link className="login-link" to="/login">
-            Log In
-          </Link>
-        </StyleButton>
-      </SignUpWrapper>
+      <div>
+        <NavBar />
+        <SignUpWrapper className="signUp">
+          <h1>Sign Up</h1>
+          <SignUpForm className=".formContainer" onSubmit={this.handleSubmit}>
+            <div className="form">
+              <SignUpInput
+                className="signUpInput firstName"
+                type="first_name"
+                name="first_name"
+                placeholder="First name"
+                onChange={this.handleChange}
+                value={this.state.first_name}
+                required
+              />
+              <SignUpInput
+                className="signUpInput lastName"
+                type="last_name"
+                name="last_name"
+                placeholder="Last name"
+                onChange={this.handleChange}
+                value={this.state.last_name}
+                required
+              />
+              <SignUpInput
+                className="signUpInput username"
+                type="username"
+                name="username"
+                placeholder="Username"
+                onChange={this.handleChange}
+                value={this.state.username}
+                required
+              />
+              <SignUpInput
+                className="signUpInput password"
+                type="password"
+                name="password"
+                placeholder="Password"
+                onChange={this.handleChange}
+                value={this.state.password}
+                required
+              />
+            </div>
+            <StyledButton className="signUpButton">Create Account</StyledButton>
+          </SignUpForm>
+
+          <div className="loginLink">
+            <p>Already Have an Acount?</p>
+            <pre> </pre>
+            <Link to="/login" className="signUpLoginLink">
+              Login
+            </Link>
+          </div>
+        </SignUpWrapper>
+      </div>
     );
   }
 }
 
-const mapStateToProps = ({ error, signingUp }) => ({ error, signingUp });
-
-export default connect(
-  mapStateToProps,
-  { signUp }
-)(SignupForm);
+export default SignUp;

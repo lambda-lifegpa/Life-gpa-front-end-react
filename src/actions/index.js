@@ -1,7 +1,6 @@
 import axios from "axios";
-import { createBrowserHistory } from "history";
-
-export const history = createBrowserHistory();
+import { history } from "../helper/history";
+import authentication from "../authentication/authentication";
 
 //login
 export const LOGIN_START = "LOGIN_START";
@@ -56,16 +55,18 @@ export const TOGGLE_HABIT_DONE = "TOGGLE_HABIT_DONE";
 
 //Login
 
-export const login = credentials => dispatch => {
-  dispatch({ type: LOGIN_START });
-  return axios
-    .post("https://lifegpadb.herokuapp.com/api/users/login", credentials)
+export const login = e => {
+  e.preventDefault();
+  const credentials = this.state;
+  axios
+    .post("http://lifegpadb.herokuapp.com/api/users/login", credentials)
     .then(res => {
-      const username = res.data.username;
+      console.log(res.data, "5");
       const token = res.data.token;
+      const id = res.data.id;
       localStorage.setItem("token", token);
-      localStorage.setItem("username", username);
-      this.props.history.push("/protected");
+      localStorage.setItem("id", id);
+      this.props.history.push("/home");
     })
     .catch(err => console.log(err.response));
 };
@@ -93,22 +94,35 @@ export const getData = () => dispatch => {
 
 // signup
 
-export const signUp = credentials => dispatch => {
-  dispatch({ type: SIGNUP_START });
+// export const signUp = credentials => dispatch => {
+//   dispatch({ type: SIGNUP_START });
+//   return axios
+//     .post("https://lifegpadb.herokuapp.com/api/users/register", credentials)
+//     .then(res => {
+//       localStorage.setItem("token", res.data.payload);
+//       dispatch({ type: SIGNUP_SUCCESS, payload: res.data.payload });
+//       history.push("/protected");
+//     });
+// };
+
+export const signUp = e => {
+  e.preventDefault();
   const credentials = this.state;
-  return axios
-    .post("https://lifegpadb.herokuapp.com/api/users/register", credentials)
+  axios
+    .post("http://lifegpadb.herokuapp.com/api/users/register", credentials)
     .then(res => {
+      const token = res.data.token;
+      localStorage.setItem("token", token);
       this.props.history.push("/login");
     })
-    .catch(err => console.log(err.response));
+    .catch(err => console.log(err));
 };
 
 // add Habit
 
 export const addHabit = habit => dispatch => {
   return axios
-    .post("https://life-gpa-api.herokuapp.com/api/habits", habit, {
+    .post("https://lifegpadb.herokuapp.com/api/habits", habit, {
       headers: { Authorization: localStorage.getItem("token") }
     })
     .then(res => {
@@ -141,22 +155,73 @@ export const deleteHabit = habit => dispatch => {
 };
 
 //update Habit
-export const updateHabit = habit => dispatch => {
-  console.log("updateTask action", habit);
-  return axios
-    .put(`https://lifegpadb.herokuapp.com/api/habits/${habit.id}`, habit, {
-      headers: { Authorization: localStorage.getItem("token") }
+export const updateHabit = (e, id, habit) => dispatch => {
+  e.preventDefault();
+  authentication()
+    .put(`http://lifegpadb.herokuapp.com/api/habits/${id}`, {
+      habit: this.state.updateHabit
     })
     .then(res => {
-      dispatch({ type: UPDATE_HABIT, payload: res.data });
+      this.setState({ updateHabit: "" });
     })
-    .catch(err => {
-      if (err.response.status === 403) {
-        dispatch({ type: UNAUTHORIZED_USER, payload: err.response });
-      } else {
-        dispatch({ type: UPDATE_HABIT_FAIL, payload: err.response });
-      }
+    .then(res => {
+      authentication()
+        .get("http://lifegpadb.herokuapp.com/api/habits/")
+        .then(res => {
+          this.props.getHabits();
+        });
+      this.setState({ editHabit: false });
     });
+};
+
+export const toggle = (id, i) => {
+  let lastCompletedDate = null;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (this.props.habit.last_completed !== null) {
+    lastCompletedDate = new Date(this.props.habit.last_completed);
+  } else {
+    lastCompletedDate = new Date(today - 1000 * 60 * 60 * 24);
+    lastCompletedDate.setHours(0, 0, 0, 0);
+  }
+
+  const dateDifference = (today - lastCompletedDate) / 1000 / 60 / 60 / 24;
+
+  if (dateDifference >= 1) {
+    console.log("INCREMENTING");
+    let newCount;
+    if (this.props.habit.count == null || this.props.habit.count === 0) {
+      newCount = 1;
+    } else {
+      newCount = this.props.count + 1;
+    }
+
+    authentication()
+      .put(`http://lifegpadb.herokuapp.com/api/habits/${id}`, {
+        count: newCount,
+        last_completed: today
+      })
+      .then(res => {
+        this.props.getHabits();
+      })
+      .catch(err => console.log("whatTheLiteralF"));
+  } else {
+    console.log("DECREMENTING");
+    const newCount = this.props.habit.count - 1;
+
+    const yesterday = new Date(today - 1000 * 60 * 60 * 24);
+    yesterday.setHours(0, 0, 0, 0);
+
+    authentication()
+      .put(`http://lifegpadb.herokuapp.com/api/habits/${id}`, {
+        count: newCount,
+        last_completed: yesterday
+      })
+      .then(res => this.props.getHabits())
+      .catch(err => console.log("error"));
+  }
 };
 
 //GPAS
